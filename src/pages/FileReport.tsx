@@ -1,32 +1,31 @@
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import GoogleMapRender from "../components/GoogleMapRender";
 
 const FileReport = () => {
-  const containerStyle = {
-    width: "400px",
-    height: "400px",
-  };
+  const [location, setLocation] = useState({
+    lng: 12.8797,
+    lat: 121.774,
+  });
 
-  const center = {
-    lat: -3.745,
-    lng: -38.523,
-  };
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+      console.log("Geolocation not supported");
+    }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(success, error);
-  } else {
-    console.log("Geolocation not supported");
-  }
+    function success(position: any) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      setLocation({ lng: longitude, lat: latitude });
+      // console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+    }
 
-  function success(position: any) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-  }
-
-  function error() {
-    console.log("Unable to retrieve your location");
-  }
+    function error() {
+      console.log("Unable to retrieve your location");
+    }
+  }, []);
 
   return (
     <div className="flex flex-col max_width">
@@ -70,10 +69,7 @@ const FileReport = () => {
           </div>
         </form>
 
-        <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={10}>
-          {/* Child components, such as markers, info windows, etc. */}
-          <></>
-        </GoogleMap>
+        <GoogleMapRender />
       </div>
     </div>
   );
