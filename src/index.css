@@ -74,3 +74,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .form-inputs {
+    @apply shadow ring-gray-100;
+  }
+}
