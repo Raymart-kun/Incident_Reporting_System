@@ -3,22 +3,23 @@ import { NavLink, useLocation } from "react-router-dom";
 import { FaFileCirclePlus } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
 import { IoLogOut, IoPersonSharp } from "react-icons/io5";
+import { cn } from "@/lib/utils";
 
 const NavList = [
   {
     name: "Create Report",
     route: "/create_report",
-    Icon: <FaFileCirclePlus size={20} color="white" />,
+    Icon: <FaFileCirclePlus size={20} />,
   },
   {
     name: "Report List",
     route: "/report_list",
-    Icon: <FaFileAlt size={20} color="white" />,
+    Icon: <FaFileAlt size={20} />,
   },
   {
     name: "Profile",
     route: "/profile",
-    Icon: <IoPersonSharp size={20} color="white" />,
+    Icon: <IoPersonSharp size={20} />,
   },
 ];
 
@@ -42,12 +43,15 @@ const SideNav = () => {
                   <NavLink
                     to={nav.route}
                     key={nav.name}
-                    className="flex px-3 flex-row gap-3 items-center py-2"
+                    className={({ isActive }) =>
+                      cn(
+                        "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary group text-white hover:text-secondary-foreground",
+                        { " bg-secondary text-sec": isActive }
+                      )
+                    }
                   >
                     {nav.Icon}
-                    <p className="text-lg font-semibold text-white">
-                      {nav.name}
-                    </p>
+                    <p className="text-lg font-semibold ">{nav.name}</p>
                   </NavLink>
                 ))}
               </div>
