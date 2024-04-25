@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+
+import { NavLink, Outlet} from "react-router-dom";
 import { FaFileCirclePlus } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
 import { IoLogOut, IoPersonSharp } from "react-icons/io5";
@@ -24,11 +24,8 @@ const NavList = [
 ];
 
 const SideNav = () => {
-  const location = useLocation();
-  const { pathname } = location;
   return (
     <>
-      {pathname !== "/sign-in" && pathname !== "/sign-up" && (
         <div className="flex min-h-[100vh] bg-primary p-2  flex-col min-w-[320px] h-full">
           <div className="flex flex-col flex-1 justify-between">
             <div className="flex flex-col gap-5">
@@ -66,7 +63,7 @@ const SideNav = () => {
             </NavLink>
           </div>
         </div>
-      )}
+      <Outlet /> 
     </>
   );
 };

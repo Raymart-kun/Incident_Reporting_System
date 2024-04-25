@@ -16,15 +16,15 @@ function App() {
       <AuthProvider store={store}>
         <div className="flex flex-row">
           <BrowserRouter>
-            <SideNav />
             <Routes>
-              <Route element={<SideNav />} />
-              <Route path="/" element={<HomePage />} />
-              <Route path="/create_report" element={<CreateReport />} />
-              <Route path="/report_list" element={<ReportList />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<SideNav />}>
+                <Route index element={<HomePage />} />
+                <Route path="create_report" element={<CreateReport />} />
+                <Route path="report_list" element={<ReportList />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
               <Route path="/sign-up" element={<SignUp />} />
-              <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/sign-in" element={<SignIn />} index />
             </Routes>
           </BrowserRouter>
         </div>

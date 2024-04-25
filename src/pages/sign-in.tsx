@@ -25,6 +25,7 @@ const SignIn = () => {
             </NavLink>
           </span>
         </CardFooter>
+        {/* <Meteors number={30} /> */}
       </Card>
     </div>
   );
