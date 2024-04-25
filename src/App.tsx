@@ -1,21 +1,33 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import FileReport from "./pages/FileReport";
 import SignUp from "./pages/sign-up";
 import SignIn from "./pages/sign-in";
-import AuthProvider from 'react-auth-kit';
-import store from './lib/auth'
+import AuthProvider from "react-auth-kit";
+import store from "./lib/auth";
+import HomePage from "./pages/home";
+import SideNav from "./components/navbar/sideNav";
+import CreateReport from "./pages/home/create_report";
+import Profile from "./pages/home/profile";
+import ReportList from "./pages/home/report_list";
+
 function App() {
   return (
     <>
-    <AuthProvider store={store}>
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Routes>
-          <Route path="/file-report" element={<FileReport />} />
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/sign-in" element={<SignIn />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider store={store}>
+        <div className="flex flex-row">
+          <BrowserRouter>
+            <SideNav />
+            <Routes>
+              <Route element={<SideNav />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/create_report" element={<CreateReport />} />
+              <Route path="/report_list" element={<ReportList />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/sign-in" element={<SignIn />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
       </AuthProvider>
     </>
   );
