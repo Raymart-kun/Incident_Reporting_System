@@ -1,3 +1,10 @@
+import RegisterForm from "@/components/forms/registerform";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import React, { useEffect } from "react";
 
@@ -29,10 +36,15 @@ const FileReport = () => {
   }
 
   return (
-    <div className="flex flex-col max_width">
-      <div>
-        <GoogleMap />
-      </div>
+    <div className="h-svh w-full flex justify-center items-center">
+      <Card className="w-svw sm:w-[400px]">
+        <CardHeader className="font-bold text-primary text-3xl">
+          SIGN UP
+        </CardHeader>
+        <CardContent>
+          <RegisterForm />
+        </CardContent>
+      </Card>
     </div>
   );
 };
