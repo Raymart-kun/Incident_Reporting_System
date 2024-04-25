@@ -9,9 +9,9 @@ function App() {
   return (
     <>
     <AuthProvider store={store}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Routes>
-          <Route path="/file_report" element={<FileReport />} />
+          <Route path="/file-report" element={<FileReport />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-in" element={<SignIn />} />
         </Routes>

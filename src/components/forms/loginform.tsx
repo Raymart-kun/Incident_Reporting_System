@@ -74,7 +74,7 @@ const LoginForm = () => {
                 )}
               />
             </div>
-            <Button type="submit" className="w-full">LOGIN </Button>
+            <Button type="submit" className="w-full bg-foreground">LOGIN </Button>
           </div>
         </form>
       </Form>
