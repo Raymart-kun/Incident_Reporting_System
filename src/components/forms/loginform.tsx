@@ -1,19 +1,23 @@
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "./validators";
-import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
 import { useNavigate } from "react-router-dom";
 import { decodeToken } from "react-jwt";
-import {user$} from "@/lib/states/userState";
+import { user$ } from "@/lib/states/userState";
+import axios from "axios";
+import { useState } from "react";
+import { SignInSchema } from "@/types";
+import SubmitButton from "@/components/forms/SubmitButton";
+
 
 const LoginForm = () => {
   const signIn = useSignIn()
   const navigate = useNavigate()
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const [isLoading, setLoading] = useState(false);
+  const form = useForm<SignInSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
@@ -21,33 +25,34 @@ const LoginForm = () => {
     }
   })
 
-  const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
-    const res = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
-      method: 'POST',
-      body: JSON.stringify({
-        username: data.username,
-        password: data.password
-      })
-    })
-
+  const handleSubmit = async (data: SignInSchema) => {
+    setLoading(true);
     try {
-      const { code, data } = await res.json()
-      const user = await decodeToken(data)
+      const { data: userData } = await axios.post(
+        `${import.meta.env.VITE_STAGING_BASE_URL}/login`,
+        {
+          username: data.username,
+          password: data.password,
+        }
+      );
+
+      const { code, data: token } = userData;
+      const user = await decodeToken(token);
       if (code === 200) {
         const isLoggedIn = signIn({
           auth: {
-            token: data,
+            token: token,
           },
           // refresh: 'ey....mA',
           userState: {
             user: user,
-          }
-        })
+          },
+        });
 
         if (isLoggedIn) {
-          user$.user.set(user)
-          user$.isLoggedIn.set(true)
-          navigate("/create-report", { replace: true })
+          user$.user.set(user);
+          user$.isLoggedIn.set(true);
+          navigate("/create-report", { replace: true });
         } else {
           //Throw error
         }
@@ -55,6 +60,8 @@ const LoginForm = () => {
 
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false);
     }
   }
   return (
@@ -90,7 +97,7 @@ const LoginForm = () => {
                 )}
               />
             </div>
-            <Button type="submit" className="w-full bg-foreground">LOGIN </Button>
+            <SubmitButton title="Login" isLoading={isLoading} />
           </div>
         </form>
       </Form>
