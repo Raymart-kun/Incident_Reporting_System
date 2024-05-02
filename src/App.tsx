@@ -10,7 +10,14 @@ import ReportList from "./pages/home/report_list";
 import AuthPage from "./components/auth/AuthPage";
 import SideNav from "./components/navbar/sideNav";
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-const queryClient = new QueryClient();
+import { defaultQueryFn } from "./lib/query/queries";
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: defaultQueryFn,
+    }
+  }
+});
 
 function App() {
   return (
