@@ -4,7 +4,7 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 
 const containerStyle = {
-  width: "700px",
+  width: "100%",
   height: "700px",
 };
 
@@ -21,7 +21,7 @@ function GoogleMapRender({ getMapData }: GoogleMapRenderProps) {
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: import.meta.env.GOOGLE_API_KEY,
+    googleMapsApiKey: "AIzaSyAo94577VUS3xGDmHUm-ogK8ey1pjyn7kI",
   });
 
   useEffect(() => {
@@ -65,16 +65,22 @@ function GoogleMapRender({ getMapData }: GoogleMapRenderProps) {
             if (results) {
               const firstResult = results[0];
               console.log(firstResult);
-              const barangay = firstResult.address_components.find(
+              const province = firstResult.address_components.find(
                 (component) =>
-                  component.types.includes("sublocality_level_1") ||
-                  component.types.includes("neighborhood")
+                  component.types.includes("administrative_area_level_1")
+              );
+              const sublocality = firstResult.address_components.find(
+                (component) => component.types.includes("sublocality")
               );
               const city = firstResult.address_components.find((component) =>
                 component.types.includes("locality")
               );
-
-              console.log("address", barangay, city);
+              const mapdata = {
+                city: city?.long_name,
+                province: province?.long_name,
+                sublocality: sublocality?.long_name,
+              };
+              getMapData(mapdata);
             } else {
               console.log("No results found");
             }

@@ -1,38 +1,44 @@
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "./validators";
-import { z } from 'zod'
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 import { decodeToken } from "react-jwt";
-import {user$} from "@/lib/states/userState";
+import { user$ } from "@/lib/states/userState";
 
 const LoginForm = () => {
-  const signIn = useSignIn()
-  const navigate = useNavigate()
+  const signIn = useSignIn();
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
-    }
-  })
+    },
+  });
 
   const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     const res = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         username: data.username,
-        password: data.password
-      })
-    })
+        password: data.password,
+      }),
+    });
 
     try {
-      const { code, data } = await res.json()
-      const user = await decodeToken(data)
+      const { code, data } = await res.json();
+      const user = await decodeToken(data);
       if (code === 200) {
         const isLoggedIn = signIn({
           auth: {
@@ -41,22 +47,21 @@ const LoginForm = () => {
           // refresh: 'ey....mA',
           userState: {
             user: user,
-          }
-        })
+          },
+        });
 
         if (isLoggedIn) {
-          user$.user.set(user)
-          user$.isLoggedIn.set(true)
-          navigate("/create-report", { replace: true })
+          user$.user.set(user);
+          user$.isLoggedIn.set(true);
+          navigate("/create-report", { replace: true });
         } else {
           //Throw error
         }
       }
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   return (
     <div>
       <Form {...form}>
@@ -70,7 +75,10 @@ const LoginForm = () => {
                   <FormItem className="flex items-start flex-col w-full">
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input {...field} className="form-inputs focus-visible:ring-0" />
+                      <Input
+                        {...field}
+                        className="form-inputs focus-visible:ring-0"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -84,18 +92,24 @@ const LoginForm = () => {
                   <FormItem className="flex items-start flex-col w-full">
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="form-inputs focus-visible:ring-0" />
+                      <Input
+                        {...field}
+                        type="password"
+                        className="form-inputs focus-visible:ring-0"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
               />
             </div>
-            <Button type="submit" className="w-full bg-foreground">LOGIN </Button>
+            <Button type="submit" className="w-full bg-foreground">
+              LOGIN{" "}
+            </Button>
           </div>
         </form>
       </Form>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

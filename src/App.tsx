@@ -9,7 +9,7 @@ import Profile from "./pages/home/profile";
 import ReportList from "./pages/home/report_list";
 import AuthPage from "./components/auth/AuthPage";
 import SideNav from "./components/navbar/sideNav";
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 function App() {
@@ -22,7 +22,11 @@ function App() {
               <Routes>
                 <Route element={<SideNav />}>
                   {/* <Route index element={<HomePage />} /> */}
-                  <Route index path="/create-report" element={<CreateReport />} />
+                  <Route
+                    index
+                    path="/create-report"
+                    element={<CreateReport />}
+                  />
                   <Route path="/report-list" element={<ReportList />} />
                   <Route path="/profile" element={<Profile />} />
                 </Route>
