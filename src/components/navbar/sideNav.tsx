@@ -5,22 +5,23 @@ import { FaFileAlt } from "react-icons/fa";
 import useSignOut from 'react-auth-kit/hooks/useSignOut';
 import { IoLogOut, IoPersonSharp } from "react-icons/io5";
 import PrivateRoute from "../PrivateRoute";
+import { cn } from "@/lib/utils";
 
 const NavList = [
   {
     name: "Create Report",
-    route: "/create-report",
-    Icon: <FaFileCirclePlus size={20} color="white" />,
+    route: "/create_report",
+    Icon: <FaFileCirclePlus size={20} />,
   },
   {
     name: "Report List",
-    route: "/report-list",
-    Icon: <FaFileAlt size={20} color="white" />,
+    route: "/report_list",
+    Icon: <FaFileAlt size={20} />,
   },
   {
     name: "Profile",
     route: "/profile",
-    Icon: <IoPersonSharp size={20} color="white" />,
+    Icon: <IoPersonSharp size={20} />,
   },
 ];
 
@@ -39,19 +40,22 @@ const SideNav = () => {
             <div className="h-[1px] bg-white w-full" />
 
             <div className="flex flex-col gap-2">
-              {NavList.map((nav) => (
-                <NavLink
-                  to={nav.route}
-                  key={nav.name}
-                  className="flex px-3 flex-row gap-3 items-center py-2"
-                >
-                  {nav.Icon}
-                  <p className="text-lg font-semibold text-white">
-                    {nav.name}
-                  </p>
-                </NavLink>
-              ))}
-            </div>
+                {NavList.map((nav) => (
+                  <NavLink
+                    to={nav.route}
+                    key={nav.name}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary group text-white hover:text-secondary-foreground",
+                        { " bg-secondary text-sec": isActive }
+                      )
+                    }
+                  >
+                    {nav.Icon}
+                    <p className="text-lg font-semibold ">{nav.name}</p>
+                  </NavLink>
+                ))}
+              </div>
           </div>
 
           <button
