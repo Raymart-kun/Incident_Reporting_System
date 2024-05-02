@@ -5,23 +5,48 @@ import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { signupSchema } from "./validators"
 import { zodResolver } from "@hookform/resolvers/zod"
+import useSignIn from "react-auth-kit/hooks/useSignIn"
 
 const RegisterForm = () => {
+  const signIn = useSignIn()
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       confirmPassword: "",
       firstName: "",
       lastName: "",
-      email: "",
+      username: "",
       password: "",
     }
   })
 
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
+  //   const registereduser = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/register`, {
+  //     method: 'POST',
+  //     body: JSON.stringify({
+  //       username: data.username,
+  //       password: data.password
+  //     })
+  //   })
 
-    console.log(data)
-    return data
+  //   const reguser = await registereduser.json()
+
+  //   const res = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
+  //     method: 'POST',
+  //     body: JSON.stringify({
+  //       username: reguser.username,
+  //       password: reguser.password
+  //     })
+  //   })
+
+  //   const { code, message, data: data1 } = await res.json()
+
+  //   const user = decodeToken( data1)
+
+
+
+  //   // console.log(data)
+  //   return data
   }
   return (
     <div>
@@ -57,10 +82,10 @@ const RegisterForm = () => {
             <div className="flex gap-2 flex-row">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem className="flex items-start flex-col w-full">
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input {...field} className="form-inputs focus-visible:ring-0" />
                     </FormControl>

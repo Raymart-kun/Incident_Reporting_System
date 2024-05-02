@@ -1,21 +1,22 @@
 
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { FaFileCirclePlus } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
 import useSignOut from 'react-auth-kit/hooks/useSignOut';
 import { IoLogOut, IoPersonSharp } from "react-icons/io5";
 import PrivateRoute from "../PrivateRoute";
 import { cn } from "@/lib/utils";
+import { user$ } from "@/lib/states/userState";
 
 const NavList = [
   {
     name: "Create Report",
-    route: "/create_report",
+    route: "/create-report",
     Icon: <FaFileCirclePlus size={20} />,
   },
   {
     name: "Report List",
-    route: "/report_list",
+    route: "/report-list",
     Icon: <FaFileAlt size={20} />,
   },
   {
@@ -27,6 +28,7 @@ const NavList = [
 
 const SideNav = () => {
   const signOut = useSignOut();
+  const navigate = useNavigate();
   return (
     <>
       <div className="flex min-h-[100vh] bg-primary p-2  flex-col min-w-[320px] h-full">
@@ -61,8 +63,9 @@ const SideNav = () => {
           <button
             className="flex px-3 flex-row gap-3 items-center py-2"
             onClick={() => {
+              user$.set({user: {}, isLoggedIn: false})
               signOut()
-              console.log("Napindot")
+              navigate("/sign-in", { replace: true })
             }}
           >
             <IoLogOut color="white" size={20} />

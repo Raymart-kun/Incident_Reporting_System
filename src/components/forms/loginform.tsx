@@ -2,44 +2,60 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-// import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import { loginSchema } from "./validators";
+import { z } from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod";
+import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import { useNavigate } from "react-router-dom";
+import { decodeToken } from "react-jwt";
+import {user$} from "@/lib/states/userState";
 
 const LoginForm = () => {
-  // const signIn = useSignIn()
-  const form = useForm()
+  const signIn = useSignIn()
+  const navigate = useNavigate()
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    }
+  })
 
+  const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
+    const res = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        username: data.username,
+        password: data.password
+      })
+    })
 
+    try {
+      const { code, data } = await res.json()
+      const user = await decodeToken(data)
+      if (code === 200) {
+        const isLoggedIn = signIn({
+          auth: {
+            token: data,
+          },
+          // refresh: 'ey....mA',
+          userState: {
+            user: user,
+          }
+        })
 
-  const handleSubmit = async () => {
-    // fetch('/api/login', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     email,
-    //     password
-    //   })
-    // }).then(res => {
-    //   if (res.status === 200) {
-    //     if (signIn({
-    //       auth: {
-    //         token: 'ey....mA',
-    //         type: 'Bearer'
-    //       },
-    //       refresh: 'ey....mA',
-    //       userState: {
-    //         name: 'React User',
-    //         uid: 123456
-    //       }
-    //     })) {
-    //       // Redirect or do-something
-    //     } else {
-    //       //Throw error
-    //     }
-    //     return res.json()
-    //   } else {
-    //     throw new Error('Login failed')
-    //   }
-    // })
+        if (isLoggedIn) {
+          user$.user.set(user)
+          user$.isLoggedIn.set(true)
+          navigate("/create-report", { replace: true })
+        } else {
+          //Throw error
+        }
+      }
 
+    } catch (error) {
+      console.log(error)
+    }
   }
   return (
     <div>
@@ -49,10 +65,10 @@ const LoginForm = () => {
             <div className="flex gap-2 flex-row">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem className="flex items-start flex-col w-full">
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input {...field} className="form-inputs focus-visible:ring-0" />
                     </FormControl>

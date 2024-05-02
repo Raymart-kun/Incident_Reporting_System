@@ -7,8 +7,6 @@ import store from "./lib/auth";
 import CreateReport from "./pages/home/create_report";
 import Profile from "./pages/home/profile";
 import ReportList from "./pages/home/report_list";
-import PrivateRoute from "./components/PrivateRoute";
-// import PublicRoute from "./components/PublicRoute";
 import AuthPage from "./components/auth/AuthPage";
 import SideNav from "./components/navbar/sideNav";
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'

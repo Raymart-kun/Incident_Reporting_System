@@ -8,7 +8,10 @@ import {
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import React, { useEffect } from "react";
 
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+
 const FileReport = () => {
+  const auth = useAuthUser()
   const containerStyle = {
     width: "400px",
     height: "400px",
@@ -37,6 +40,7 @@ const FileReport = () => {
 
   return (
     <div className="h-svh w-full flex justify-center items-center">
+      {console.log(auth)}
       <Card className="w-svw sm:w-[400px]">
         <CardHeader className="font-bold text-primary text-3xl">
           SIGN UP
