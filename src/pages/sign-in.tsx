@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom'
 
 const SignIn = () => {
   return (
