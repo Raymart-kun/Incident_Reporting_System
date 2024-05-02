@@ -10,7 +10,7 @@ export type SignUp = {
 export type SignIn = Omit<SignUp, "confirmPassword" | "firstName" | "lastName">;
 
 export const signupSchema = z.object({
-  email: z.string().email(),
+  username: z.string(),
   password: z.string().min(8),
   confirmPassword: z.string().min(8).optional(),
   firstName: z.string(),
@@ -28,3 +28,9 @@ export const CreateReportSchema = z.object({
 });
 
 export type CreateReportSchemaType = z.infer<typeof CreateReportSchema>;
+
+
+export const loginSchema = z.object({
+  username: z.string().min(1, {message: 'Username is required'}),
+  password: z.string().min(1),
+})

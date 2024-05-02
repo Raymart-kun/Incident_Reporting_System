@@ -4,6 +4,7 @@ import {
   CreateReportSchema,
   CreateReportSchemaType,
 } from "@/components/forms/validators";
+import { regions, municipalities, barangays, provinces } from "psgc";
 import {
   Form,
   FormControl,
@@ -27,15 +28,36 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { useCallback } from "react";
-
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { MappedProvince } from "psgc/dist/PsgcInterface";
 const CreateReport = () => {
+  const provincesList: MappedProvince[] = provinces.all();
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
   });
 
   const getMapData = useCallback((value: any) => {
-    form.setValue("title", "hahaha");
+    if (value) {
+      form.setValue("city", value.city);
+      form.setValue("province", value.province);
+    }
+
+    console.log(municipalities.filter("Metro Manila"));
+    console.log(
+      "get Barangays",
+      value.sublocality,
+      barangays.filter("Metro Manila")
+    );
   }, []);
+
+  console.log(provincesList);
 
   return (
     <Container title={"Create Report"}>
@@ -137,14 +159,57 @@ const CreateReport = () => {
                 control={form.control}
                 name="province"
                 render={({ field }) => (
-                  <FormItem className="flex items-start flex-col w-full">
+                  <FormItem className="flex flex-col">
                     <FormLabel>Province</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="form-inputs focus-visible:ring-0"
-                      />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-[200px] justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? provincesList.find(
+                                  (province) => province.name === field.value
+                                )?.name
+                              : "Select Province."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Search language..." />
+                          <CommandEmpty>Select Province.</CommandEmpty>
+                          <CommandGroup>
+                            {/* {provincesList.map((province) => (
+                              <CommandItem
+                                value={province.name}
+                                key={province.name} // Use a unique identifier, such as province name
+                                onSelect={() => {
+                                  form.setValue("province", province.name);
+                                }}
+                              >
+                                {/* <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    province.name === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                /> */}
+                            {/* {province.name}
+                              </CommandItem> */}
+                            {/* ))} */}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
