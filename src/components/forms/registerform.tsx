@@ -2,14 +2,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-import { z } from 'zod'
 import { signupSchema } from "./validators"
 import { zodResolver } from "@hookform/resolvers/zod"
 import useSignIn from "react-auth-kit/hooks/useSignIn"
 import { SignUpSchema } from "@/types"
 import axios from "axios"
+import { decodeToken } from "react-jwt"
+import { user$ } from "@/lib/states/userState"
+import { useNavigate } from "react-router-dom"
 
 const RegisterForm = () => {
+  const navigate =useNavigate()
   const signIn = useSignIn()
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signupSchema),
@@ -35,8 +38,26 @@ const RegisterForm = () => {
       })
 
       const {code, data: token, message }= res
+      const user = await decodeToken(token);
+      if (code === 200) {
+        const isLoggedIn = signIn({
+          auth: {
+            token: token,
+          },
+          // refresh: 'ey....mA',
+          userState: {
+            user: user,
+          },
+        });
 
-
+        if (isLoggedIn) {
+          user$.user.set(user);
+          user$.isLoggedIn.set(true);
+          navigate("/create-report", { replace: true });
+        } else {
+          //Throw error
+        }
+      }
 
 
     } catch (error) {

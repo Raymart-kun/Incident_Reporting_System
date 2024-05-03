@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -37,7 +37,9 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { MappedProvince } from "psgc/dist/PsgcInterface";
+import { CommandList } from "cmdk";
 const CreateReport = () => {
+  const [open, setOpen] = useState(false)
   const provincesList: MappedProvince[] = provinces.all();
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
@@ -161,7 +163,7 @@ const CreateReport = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Province</FormLabel>
-                    <Popover>
+                    <Popover open={open} onOpenChange={setOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -174,8 +176,8 @@ const CreateReport = () => {
                           >
                             {field.value
                               ? provincesList.find(
-                                  (province) => province.name === field.value
-                                )?.name
+                                (province) => province.name === field.value
+                              )?.name
                               : "Select Province."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -186,25 +188,28 @@ const CreateReport = () => {
                           <CommandInput placeholder="Search language..." />
                           <CommandEmpty>Select Province.</CommandEmpty>
                           <CommandGroup>
-                            {/* {provincesList.map((province) => (
-                              <CommandItem
-                                value={province.name}
-                                key={province.name} // Use a unique identifier, such as province name
-                                onSelect={() => {
-                                  form.setValue("province", province.name);
-                                }}
-                              >
-                                {/* <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    province.name === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                /> */}
-                            {/* {province.name}
-                              </CommandItem> */}
-                            {/* ))} */}
+                            <CommandList>
+                              {provincesList.map((province) => (
+                                <CommandItem
+                                  value={province.name}
+                                  key={province.name} // Use a unique identifier, such as province name
+                                  onSelect={() => {
+                                    form.setValue("province", province.name);
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      province.name === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {province.name}
+                                </CommandItem>
+                              ))}
+                            </CommandList>
                           </CommandGroup>
                         </Command>
                       </PopoverContent>
