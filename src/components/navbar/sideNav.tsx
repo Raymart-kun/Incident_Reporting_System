@@ -1,8 +1,7 @@
-
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { FaFileCirclePlus } from "react-icons/fa6";
 import { FaFileAlt } from "react-icons/fa";
-import useSignOut from 'react-auth-kit/hooks/useSignOut';
+import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { IoLogOut, IoPersonSharp } from "react-icons/io5";
 import PrivateRoute from "../PrivateRoute";
 import { cn } from "@/lib/utils";
@@ -42,30 +41,30 @@ const SideNav = () => {
             <div className="h-[1px] bg-white w-full" />
 
             <div className="flex flex-col gap-2">
-                {NavList.map((nav) => (
-                  <NavLink
-                    to={nav.route}
-                    key={nav.name}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary group text-white hover:text-secondary-foreground",
-                        { " bg-secondary text-sec": isActive }
-                      )
-                    }
-                  >
-                    {nav.Icon}
-                    <p className="text-lg font-semibold ">{nav.name}</p>
-                  </NavLink>
-                ))}
-              </div>
+              {NavList.map((nav) => (
+                <NavLink
+                  to={nav.route}
+                  key={nav.name}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary group text-white hover:text-secondary-foreground",
+                      { " bg-secondary text-sec": isActive }
+                    )
+                  }
+                >
+                  {nav.Icon}
+                  <p className="text-lg font-semibold ">{nav.name}</p>
+                </NavLink>
+              ))}
+            </div>
           </div>
 
           <button
             className="flex px-3 flex-row gap-3 items-center py-2"
             onClick={() => {
-              user$.set({user: {}, isLoggedIn: false})
-              signOut()
-              navigate("/sign-in", { replace: true })
+              user$.set({ user: {}, isLoggedIn: false });
+              signOut();
+              navigate("/sign-in", { replace: true });
             }}
           >
             <IoLogOut color="white" size={20} />

@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { useForm } from "react-hook-form";
 import { loginSchema } from "./validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 import { decodeToken } from "react-jwt";
 import { user$ } from "@/lib/states/userState";
@@ -22,8 +22,8 @@ const LoginForm = () => {
     defaultValues: {
       username: "",
       password: "",
-    }
-  })
+    },
+  });
 
   const handleSubmit = async (data: SignInSchema) => {
     setLoading(true);
@@ -57,13 +57,12 @@ const LoginForm = () => {
           //Throw error
         }
       }
-
     } catch (error) {
       console.log(error)
     } finally {
       setLoading(false);
     }
-  }
+  };
   return (
     <div>
       <Form {...form}>
@@ -77,7 +76,10 @@ const LoginForm = () => {
                   <FormItem className="flex items-start flex-col w-full">
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input {...field} className="form-inputs focus-visible:ring-0" />
+                      <Input
+                        {...field}
+                        className="form-inputs focus-visible:ring-0"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -91,7 +93,11 @@ const LoginForm = () => {
                   <FormItem className="flex items-start flex-col w-full">
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="form-inputs focus-visible:ring-0" />
+                      <Input
+                        {...field}
+                        type="password"
+                        className="form-inputs focus-visible:ring-0"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -102,7 +108,7 @@ const LoginForm = () => {
         </form>
       </Form>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

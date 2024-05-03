@@ -29,7 +29,11 @@ function App() {
               <Routes>
                 <Route element={<SideNav />}>
                   {/* <Route index element={<HomePage />} /> */}
-                  <Route index path="/create-report" element={<CreateReport />} />
+                  <Route
+                    index
+                    path="/create-report"
+                    element={<CreateReport />}
+                  />
                   <Route path="/report-list" element={<ReportList />} />
                   <Route path="/profile" element={<Profile />} />
                 </Route>
