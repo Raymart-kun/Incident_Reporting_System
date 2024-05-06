@@ -2,14 +2,19 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-import { z } from 'zod'
 import { signupSchema } from "./validators"
 import { zodResolver } from "@hookform/resolvers/zod"
 import useSignIn from "react-auth-kit/hooks/useSignIn"
+import { SignUpSchema } from "@/types"
+import axios from "axios"
+import { decodeToken } from "react-jwt"
+import { user$ } from "@/lib/states/userState"
+import { useNavigate } from "react-router-dom"
 
 const RegisterForm = () => {
+  const navigate =useNavigate()
   const signIn = useSignIn()
-  const form = useForm<z.infer<typeof signupSchema>>({
+  const form = useForm<SignUpSchema>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       confirmPassword: "",
@@ -20,26 +25,44 @@ const RegisterForm = () => {
     }
   })
 
-  const onSubmit = async (data: z.infer<typeof signupSchema>) => {
-  //   const registereduser = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/register`, {
-  //     method: 'POST',
-  //     body: JSON.stringify({
-  //       username: data.username,
-  //       password: data.password
-  //     })
-  //   })
+  const onSubmit = async (data: SignUpSchema) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_STAGING_BASE_URL}/register`, {
+        username: data.username,
+        password: data.password
+      })
 
-  //   const reguser = await registereduser.json()
+      const res = await axios.post(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
+        username: data.username,
+        password: data.password
+      })
 
-  //   const res = await fetch(`${import.meta.env.VITE_STAGING_BASE_URL}/login`, {
-  //     method: 'POST',
-  //     body: JSON.stringify({
-  //       username: reguser.username,
-  //       password: reguser.password
-  //     })
-  //   })
+      const {code, data: token, message }= res
+      const user = await decodeToken(token);
+      if (code === 200) {
+        const isLoggedIn = signIn({
+          auth: {
+            token: token,
+          },
+          // refresh: 'ey....mA',
+          userState: {
+            user: user,
+          },
+        });
 
-  //   const { code, message, data: data1 } = await res.json()
+        if (isLoggedIn) {
+          user$.user.set(user);
+          user$.isLoggedIn.set(true);
+          navigate("/create-report", { replace: true });
+        } else {
+          //Throw error
+        }
+      }
+
+
+    } catch (error) {
+      console.log(error)
+    }
 
   //   const user = decodeToken( data1)
 

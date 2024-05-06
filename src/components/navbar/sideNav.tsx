@@ -30,7 +30,7 @@ const SideNav = () => {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex min-h-[100vh] bg-primary p-2  flex-col min-w-[320px] h-full">
+      <div className="flex min-h-[100vh] bg-foreground p-2  flex-col min-w-[320px] h-full">
         <PrivateRoute />
         <div className="flex flex-col flex-1 justify-between">
           <div className="flex flex-col gap-5">
@@ -47,7 +47,7 @@ const SideNav = () => {
                   key={nav.name}
                   className={({ isActive }) =>
                     cn(
-                      "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary group text-white hover:text-secondary-foreground",
+                      "flex px-3 flex-row gap-3 items-center py-2 hover:bg-secondary/70 group text-white hover:text-secondary-foreground",
                       { " bg-secondary text-sec": isActive }
                     )
                   }
