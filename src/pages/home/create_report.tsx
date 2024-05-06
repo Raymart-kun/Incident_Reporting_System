@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -35,29 +35,128 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { MappedProvince } from "psgc/dist/PsgcInterface";
+import axios from "axios";
+
+export interface ProvinceType {
+  id: number;
+  psgcCode: string;
+  provDesc: string;
+  regCode: string;
+  provCode: string;
+}
+
+interface CityType {
+  id: number;
+  psgcCode: string;
+  citymunDesc: string;
+  provCode: string;
+  citymunCode: string;
+}
+
+export interface BarangyType {
+  id: number;
+  brgyCode: string;
+  brgyDesc: string;
+  regCode: string;
+  provCode: string;
+  citymunCode: string;
+}
+
 const CreateReport = () => {
-  const provincesList: MappedProvince[] = provinces.all();
+  const [provinceState, setProvinceState] = useState<ProvinceType[] | null>(
+    null
+  );
+  const [provCode, setProvCode] = useState<string>("");
+  const [citymunCode, setCitymunCode] = useState<string>("");
+  const [barangayCode, setBarangayCode] = useState<string>("");
+  const [cityState, setCityState] = useState<CityType[] | null>(null);
+  const [barangayState, setBarangayState] = useState<BarangyType[] | null>(
+    null
+  );
+
+  // get provinces
+  useEffect(() => {
+    async function getProvince() {
+      try {
+        await await axios
+          .get(`${import.meta.env.VITE_STAGING_BASE_URL}/location/province`)
+          .then((res) => setProvinceState(res.data.data));
+      } catch (error: any) {
+        throw new Error(error);
+      }
+    }
+
+    getProvince();
+  }, []);
+
+  // get city by province id
+  const getCityByProvinceId = useCallback(
+    async (provinceId: string) => {
+      try {
+        await axios
+          .get(
+            `${
+              import.meta.env.VITE_STAGING_BASE_URL
+            }/location/province/${provinceId}/city`
+          )
+          .then((res) => setCityState(res.data.data));
+      } catch (error: any) {
+        throw new Error(error);
+      }
+    },
+    [provCode]
+  );
+
+  // get city by province id
+  const getBarangayByCityId = useCallback(
+    async (bgryId: string) => {
+      try {
+        await axios
+          .get(
+            `${
+              import.meta.env.VITE_STAGING_BASE_URL
+            }/location/city/${bgryId}/barangay`
+          )
+          .then((res) => setBarangayState(res.data.data));
+      } catch (error: any) {
+        throw new Error(error);
+      }
+
+      console.log(cityState);
+    },
+    [citymunCode]
+  );
+
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
+    defaultValues: {
+      city: "",
+      province: "",
+    },
   });
 
   const getMapData = useCallback((value: any) => {
     if (value) {
-      form.setValue("city", value.city);
-      form.setValue("province", value.province);
+      form.setValue("city", value.city.toUpperCase());
+      form.setValue("province", value.province.toUpperCase());
     }
 
-    console.log(municipalities.filter("Metro Manila"));
-    console.log(
-      "get Barangays",
-      value.sublocality,
-      barangays.filter("Metro Manila")
-    );
-  }, []);
+    console.log(value.city);
 
-  console.log(provincesList);
+    if (provinceState) {
+      const provinceDetail = provinceState.find(
+        (e) => e.provDesc === value.province.toUpperCase()
+      );
+
+      if (provinceDetail) getCityByProvinceId(provinceDetail.provCode);
+      if (barangayState) {
+        console.log("adad");
+      }
+    }
+  }, []);
 
   return (
     <Container title={"Create Report"}>
@@ -160,7 +259,7 @@ const CreateReport = () => {
                 name="province"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Province</FormLabel>
+                    <FormLabel className="self-start">Province</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -168,43 +267,52 @@ const CreateReport = () => {
                             variant="outline"
                             role="combobox"
                             className={cn(
-                              "w-[200px] justify-between",
+                              "w-full justify-between",
                               !field.value && "text-muted-foreground"
                             )}
                           >
                             {field.value
-                              ? provincesList.find(
-                                  (province) => province.name === field.value
-                                )?.name
+                              ? provinceState?.find(
+                                  (province) =>
+                                    province.provDesc === field.value
+                                )?.provDesc
                               : "Select Province."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0">
-                        <Command>
-                          <CommandInput placeholder="Search language..." />
-                          <CommandEmpty>Select Province.</CommandEmpty>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                        <Command className="w-full">
+                          <CommandInput placeholder="Search Province..." />
+                          <CommandEmpty>No Province Found.</CommandEmpty>
+
                           <CommandGroup>
-                            {/* {provincesList.map((province) => (
-                              <CommandItem
-                                value={province.name}
-                                key={province.name} // Use a unique identifier, such as province name
-                                onSelect={() => {
-                                  form.setValue("province", province.name);
-                                }}
-                              >
-                                {/* <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    province.name === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                /> */}
-                            {/* {province.name}
-                              </CommandItem> */}
-                            {/* ))} */}
+                            <CommandList>
+                              {provinceState?.map((province) => (
+                                <CommandItem
+                                  value={province.provDesc}
+                                  key={province.provDesc} // Use a unique identifier, such as province name
+                                  onSelect={() => {
+                                    form.setValue(
+                                      "province",
+                                      province.provDesc
+                                    );
+                                    setProvCode(province.provCode);
+                                    getCityByProvinceId(province.provCode);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      province.provDesc === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {province.provDesc}
+                                </CommandItem>
+                              ))}
+                            </CommandList>
                           </CommandGroup>
                         </Command>
                       </PopoverContent>
@@ -218,14 +326,63 @@ const CreateReport = () => {
                 control={form.control}
                 name="city"
                 render={({ field }) => (
-                  <FormItem className="flex items-start flex-col w-full">
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="form-inputs focus-visible:ring-0"
-                      />
-                    </FormControl>
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="self-start">City</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? cityState?.find(
+                                  (city) => city.citymunDesc === field.value
+                                )?.citymunDesc
+                              : "Select City."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                        <Command className="w-full">
+                          <CommandInput placeholder="Search City..." />
+                          <CommandEmpty>No City Found.</CommandEmpty>
+
+                          <CommandGroup>
+                            <CommandList>
+                              {cityState?.map((city) => (
+                                <CommandItem
+                                  value={city.citymunDesc}
+                                  key={city.citymunDesc} // Use a unique identifier, such as province name
+                                  onSelect={() => {
+                                    form.setValue("city", city.citymunDesc);
+
+                                    setCitymunCode(city.citymunCode);
+                                    getBarangayByCityId(city.citymunCode);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      city.citymunDesc === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {city.citymunDesc}
+                                </CommandItem>
+                              ))}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -234,14 +391,66 @@ const CreateReport = () => {
                 control={form.control}
                 name="barangay"
                 render={({ field }) => (
-                  <FormItem className="flex items-start flex-col w-full">
-                    <FormLabel>Barangay</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="form-inputs focus-visible:ring-0"
-                      />
-                    </FormControl>
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="self-start">Barangay</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? barangayState?.find(
+                                  (barangay) =>
+                                    barangay.brgyDesc === field.value
+                                )?.brgyDesc
+                              : "Select City."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                        <Command className="w-full">
+                          <CommandInput placeholder="Search City..." />
+                          <CommandEmpty>No City Found.</CommandEmpty>
+
+                          <CommandGroup>
+                            <CommandList>
+                              {barangayState?.map((barangay) => (
+                                <CommandItem
+                                  value={barangay.brgyDesc}
+                                  key={barangay.brgyCode} // Use a unique identifier, such as province name
+                                  onSelect={() => {
+                                    form.setValue(
+                                      "barangay",
+                                      barangay.brgyDesc
+                                    );
+
+                                    setBarangayCode(barangay.brgyCode);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      barangay.brgyDesc === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {barangay.brgyDesc}
+                                </CommandItem>
+                              ))}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
