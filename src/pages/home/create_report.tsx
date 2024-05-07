@@ -29,6 +29,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useEffect, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
+
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import {
   Command,
   CommandEmpty,
@@ -40,33 +42,15 @@ import {
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { user$ } from "@/lib/states/userState";
-
-export interface ProvinceType {
-  id: number;
-  psgcCode: string;
-  provDesc: string;
-  regCode: string;
-  provCode: string;
-}
-
-interface CityType {
-  id: number;
-  psgcCode: string;
-  citymunDesc: string;
-  provCode: string;
-  citymunCode: string;
-}
-
-export interface BarangyType {
-  id: number;
-  brgyCode: string;
-  brgyDesc: string;
-  regCode: string;
-  provCode: string;
-  citymunCode: string;
-}
+import { BarangyType, CityType, ProvinceType } from "@/types";
 
 const CreateReport = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [provinceDropdown, setProvinceDropdown] = useState(false);
+  const [cityDropdown, setCityDropdown] = useState(false);
+  const [brgyDropdown, setBrgyDropdown] = useState(false);
+  const user: any = user$.user.get();
+  const token = user$.token.get();
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
     defaultValues: {
@@ -132,11 +116,7 @@ const CreateReport = () => {
 
   // get city by province id
 
-  const user = user$.user.get();
-
   const onSubmit = useCallback((values: CreateReportSchemaType) => {
-    console.log("user", user);
-
     if (
       values.title &&
       values.description &&
@@ -148,46 +128,54 @@ const CreateReport = () => {
       values.citymun_code &&
       values.brgy_code
     ) {
-      toast.loading("Creating report", {
-        id: "create-report",
-      });
+      if (user) {
+        const body = {
+          user_id: user.id,
+          description: values.description,
+          prov_code: values.prov_code,
+          citymun_code: values.citymun_code,
+          brgy_code: values.brgy_code,
+        };
 
-      try {
-        axios
-          .post(
-            `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/create`,
-            {
-              user_id: "71ae9168-b21e-45c2-a89e-9608bea6d915",
-              description: values.description,
-              prov_code: "0128",
-              citymun_code: "012801",
-              brgy_code: "012801001",
-            }
-          )
-          .then((res) => {
-            if (res.status === 400) {
+        try {
+          setIsLoading(true);
+          toast.loading("Creating report", {
+            id: "create-report",
+          });
+          axios
+            .post(
+              `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/create`,
+              body,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then((res) => {
               toast.success("Report Created Successfully", {
                 id: "create-report",
                 duration: 2000,
               });
-            } else {
-              toast.error("There was an error creating your report", {
+              setIsLoading(false);
+              form.reset();
+            })
+            .catch((error) => {
+              toast.error(`error ${error.message}`, {
                 id: "create-report",
                 duration: 2000,
               });
-            }
-          })
-          .catch((error) => {
-            toast.error("There was an error creating your report", {
-              id: "create-report",
-              duration: 2000,
+              setIsLoading(false);
             });
+        } catch (error) {
+          toast.error("There was an error creating your report", {
+            id: "create-report",
+            duration: 2000,
           });
-      } catch (error) {
-        toast.error("There was an error creating your report", {
-          id: "create-report",
-          duration: 2000,
-        });
+          setIsLoading(false);
+        } finally {
+          setIsLoading(false);
+        }
       }
     } else {
       toast.error("please fill up the missing fields", {
@@ -204,6 +192,25 @@ const CreateReport = () => {
       !form.getValues("barangay")
     ) {
       if (value) {
+        const existing = provinceQuery.data?.find(
+          (prov) => prov.provDesc === value.province.toUpperCase()
+        );
+        if (existing) {
+          form.setValue("province", existing.provDesc);
+          form.setValue("prov_code", existing.provCode);
+
+          while (cityQuery.isLoading) {
+            await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms
+          }
+          const existingCity = cityQuery.data?.find(
+            (city) => city.citymunDesc === value.city.toUpperCase()
+          );
+
+          if (existingCity) {
+            form.setValue("city", existingCity.citymunDesc);
+            form.setValue("citymun_code", existingCity.citymunCode);
+          }
+        }
       }
     }
   };
@@ -242,6 +249,7 @@ const CreateReport = () => {
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          role="combobox"
                           variant={"outline"}
                           className={cn(
                             "w-full pl-3 text-left font-normal form-inputs focus-visible:ring-0",
@@ -313,7 +321,10 @@ const CreateReport = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="self-start">Province</FormLabel>
-                    <Popover>
+                    <Popover
+                      open={provinceDropdown}
+                      onOpenChange={setProvinceDropdown}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -338,7 +349,6 @@ const CreateReport = () => {
                         <Command className="w-full">
                           <CommandInput placeholder="Search Province..." />
                           <CommandEmpty>No Province Found.</CommandEmpty>
-
                           <CommandGroup>
                             <CommandList>
                               {provinceQuery.data?.map((province) => (
@@ -356,6 +366,7 @@ const CreateReport = () => {
                                       "prov_code",
                                       province.provCode
                                     );
+                                    setProvinceDropdown(false);
                                   }}
                                 >
                                   <Check
@@ -385,7 +396,7 @@ const CreateReport = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="self-start">City</FormLabel>
-                    <Popover>
+                    <Popover open={cityDropdown} onOpenChange={setCityDropdown}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -408,7 +419,9 @@ const CreateReport = () => {
                       <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
                         <Command className="w-full">
                           <CommandInput placeholder="Search City..." />
-                          <CommandEmpty>No City Found.</CommandEmpty>
+                          <CommandEmpty>
+                            No City Found. Try selecting province first
+                          </CommandEmpty>
 
                           <CommandGroup>
                             <CommandList>
@@ -422,6 +435,7 @@ const CreateReport = () => {
                                       "citymun_code",
                                       city.citymunCode
                                     );
+                                    setCityDropdown(false);
                                   }}
                                 >
                                   <Check
@@ -451,7 +465,7 @@ const CreateReport = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="self-start">Barangay</FormLabel>
-                    <Popover>
+                    <Popover open={brgyDropdown} onOpenChange={setBrgyDropdown}>
                       <PopoverTrigger asChild>
                         <FormControl aria-disabled>
                           <Button
@@ -475,7 +489,9 @@ const CreateReport = () => {
                       <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
                         <Command className="w-full">
                           <CommandInput placeholder="Search City..." />
-                          <CommandEmpty>No City Found.</CommandEmpty>
+                          <CommandEmpty>
+                            No City Found. Try selecting city first
+                          </CommandEmpty>
 
                           <CommandGroup>
                             <CommandList>
@@ -492,6 +508,7 @@ const CreateReport = () => {
                                       "brgy_code",
                                       barangay.brgyCode
                                     );
+                                    setBrgyDropdown(false);
                                   }}
                                 >
                                   <Check
@@ -521,8 +538,11 @@ const CreateReport = () => {
           </div>
 
           <Button
+            disabled={isLoading}
             onClick={form.handleSubmit(onSubmit)}
-            className="w-[150px] self-center absolute md:right-20 md:top-10"
+            className={`w-[150px] self-center md:absolute md:right-20 md:top-10 ${
+              isLoading && "bg-foreground/50"
+            }`}
           >
             Submit Report
           </Button>

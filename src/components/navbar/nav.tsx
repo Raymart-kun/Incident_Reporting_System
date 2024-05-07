@@ -25,7 +25,7 @@ function NavBar() {
           <motion.div
             animate={{ opacity: 1, transition: { duration: 0.2 } }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            className=" absolute inset-0 h-screen w-screen bg-foreground/80"
+            className=" absolute inset-0 h-screen w-screen bg-foreground/80 z-50"
           >
             <motion.div
               initial={{ x: "-100%" }}
