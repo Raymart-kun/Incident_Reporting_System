@@ -1,5 +1,10 @@
+import { Navigate, redirect } from "react-router-dom";
+
 const HomePage = () => {
-  return <div>Hello</div>;
+
+  return (
+    <Navigate to="/sign-in" replace={true} />
+  )
 };
 
 export default HomePage;

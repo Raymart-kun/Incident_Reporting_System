@@ -15,6 +15,9 @@ export const signupSchema = z.object({
   confirmPassword: z.string().min(8).optional(),
   firstName: z.string(),
   lastName: z.string(),
+  province: z.string(),
+  city: z.string(),
+  brgy: z.string()
 });
 
 export const CreateReportSchema = z.object({

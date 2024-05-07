@@ -9,8 +9,10 @@ import Profile from "./pages/home/profile";
 import ReportList from "./pages/home/report_list";
 import AuthPage from "./components/auth/AuthPage";
 import SideNav from "./components/navbar/sideNav";
+import HomePage from "./pages/home";
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { defaultQueryFn } from "./lib/query/queries";
+import { Toaster } from "@/components/ui/sonner"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,6 +29,7 @@ function App() {
           <div className="flex flex-row">
             <BrowserRouter>
               <Routes>
+                <Route path="/" element={<HomePage />} />
                 <Route element={<SideNav />}>
                   {/* <Route index element={<HomePage />} /> */}
                   <Route
@@ -43,6 +46,7 @@ function App() {
                 </Route>
               </Routes>
             </BrowserRouter>
+            <Toaster />
           </div>
         </QueryClientProvider>
       </AuthProvider>
