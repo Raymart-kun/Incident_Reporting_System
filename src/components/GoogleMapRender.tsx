@@ -15,7 +15,7 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
   const [location, setLocation] = useState({ lng: 12.8797, lat: 121.774 });
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyAo94577VUS3xGDmHUm-ogK8ey1pjyn7kI",
+    googleMapsApiKey: `${import.meta.env.GOOGLE_API_KEY}`,
   });
 
   useEffect(() => {
@@ -30,7 +30,6 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         setLocation({ lng: longitude, lat: latitude });
-        console.log("current location");
       }
 
       if (isLoaded) {
