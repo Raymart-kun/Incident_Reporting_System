@@ -6,6 +6,7 @@ import { IoLogOut, IoPersonSharp } from "react-icons/io5";
 import PrivateRoute from "../PrivateRoute";
 import { cn } from "@/lib/utils";
 import { user$ } from "@/lib/states/userState";
+import { X } from "lucide-react";
 
 const NavList = [
   {
@@ -25,17 +26,33 @@ const NavList = [
   },
 ];
 
-const SideNav = () => {
+interface SideNavProps {
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const SideNav = ({ setIsOpen }: SideNavProps) => {
   const signOut = useSignOut();
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex min-h-[100vh] bg-foreground p-2  flex-col min-w-[320px] h-full">
+      <div className="flex min-h-[100vh] bg-foreground p-2  flex-col md:min-w-[320px] w-[350px] max-w-[80%] h-full">
         <PrivateRoute />
         <div className="flex flex-col flex-1 justify-between">
           <div className="flex flex-col gap-5">
-            <div className="px-3 mt-2">
+            <div className="relative px-3 mt-2 flex justify-center items-center">
               <p className="text-white text-2xl font-bold">Incident Report</p>
+
+              {setIsOpen && (
+                <X
+                  className="absolute right-5 cursor-pointer"
+                  color="white"
+                  onClick={() => {
+                    if (setIsOpen) {
+                      setIsOpen(false);
+                    }
+                  }}
+                />
+              )}
             </div>
 
             <div className="h-[1px] bg-white w-full" />
@@ -43,6 +60,11 @@ const SideNav = () => {
             <div className="flex flex-col gap-2">
               {NavList.map((nav) => (
                 <NavLink
+                  onClick={() => {
+                    if (setIsOpen) {
+                      setIsOpen(false);
+                    }
+                  }}
                   to={nav.route}
                   key={nav.name}
                   className={({ isActive }) =>
@@ -72,7 +94,6 @@ const SideNav = () => {
           </button>
         </div>
       </div>
-      <Outlet />
     </>
   );
 };

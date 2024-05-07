@@ -8,15 +8,16 @@ import CreateReport from "./pages/home/create_report";
 import Profile from "./pages/home/profile";
 import ReportList from "./pages/home/report_list";
 import AuthPage from "./components/auth/AuthPage";
-import SideNav from "./components/navbar/sideNav";
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { defaultQueryFn } from "./lib/query/queries";
+import NavBar from "./components/navbar/nav";
+import { Toaster } from "@/components/ui/sonner";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: defaultQueryFn,
-    }
-  }
+    },
+  },
 });
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
           <div className="flex flex-row">
             <BrowserRouter>
               <Routes>
-                <Route element={<SideNav />}>
+                <Route element={<NavBar />}>
                   {/* <Route index element={<HomePage />} /> */}
                   <Route
                     index
@@ -46,6 +47,8 @@ function App() {
           </div>
         </QueryClientProvider>
       </AuthProvider>
+
+      <Toaster />
     </>
   );
 }

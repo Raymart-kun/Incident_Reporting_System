@@ -20,17 +20,19 @@ export const signupSchema = z.object({
 export const CreateReportSchema = z.object({
   title: z.string().min(3).max(50),
   description: z.string().min(3).max(200),
-  datetime: z.date(),
-  full_address: z.string(),
-  province: z.string(),
-  city: z.string(),
-  barangay: z.string(),
+  date: z.date(),
+  full_address: z.string().min(3).max(200),
+  province: z.string().min(3),
+  city: z.string().min(3),
+  barangay: z.string().min(3),
+  prov_code: z.string().min(3),
+  citymun_code: z.string().min(3),
+  brgy_code: z.string().min(3),
 });
 
 export type CreateReportSchemaType = z.infer<typeof CreateReportSchema>;
 
-
 export const loginSchema = z.object({
-  username: z.string().min(1, {message: 'Username is required'}),
+  username: z.string().min(1, { message: "Username is required" }),
   password: z.string().min(1),
-})
+});

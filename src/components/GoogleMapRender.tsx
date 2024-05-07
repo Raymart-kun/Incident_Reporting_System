@@ -3,7 +3,7 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 const containerStyle = {
   width: "100%",
-  height: "700px",
+  height: "100%",
 };
 
 interface GoogleMapRenderProps {
@@ -15,7 +15,7 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
   const [location, setLocation] = useState({ lng: 12.8797, lat: 121.774 });
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: `${import.meta.env.GOOGLE_API_KEY}`,
+    googleMapsApiKey: "AIzaSyAo94577VUS3xGDmHUm-ogK8ey1pjyn7kI",
   });
 
   useEffect(() => {
@@ -76,6 +76,8 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
             city: city?.long_name,
             province: province?.long_name,
             sublocality: sublocality?.short_name,
+            lat: lat,
+            long: lng,
           };
           getMapData(mapdata);
         } else {

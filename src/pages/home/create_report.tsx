@@ -4,7 +4,6 @@ import {
   CreateReportSchema,
   CreateReportSchemaType,
 } from "@/components/forms/validators";
-import { regions, municipalities, barangays, provinces } from "psgc";
 import {
   Form,
   FormControl,
@@ -29,6 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { useCallback, useEffect, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { toast } from "sonner";
 import {
   Command,
   CommandEmpty,
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/command";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { user$ } from "@/lib/states/userState";
 
 export interface ProvinceType {
   id: number;
@@ -66,25 +67,21 @@ export interface BarangyType {
 }
 
 const CreateReport = () => {
-  const [provinceState, setProvinceState] = useState<ProvinceType[] | null>(
-    null
-  );
-  const [provCode, setProvCode] = useState<string | null>(null);
-  const [citymunCode, setCitymunCode] = useState<string | null>(null);
-  const [barangayCode, setBarangayCode] = useState<string>("");
-
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
     defaultValues: {
-      city: "",
+      title: "",
+      description: "",
+      date: new Date(),
+      full_address: "",
       province: "",
+      city: "",
       barangay: "",
+      prov_code: "",
+      citymun_code: "",
+      brgy_code: "",
     },
   });
-
-  const watchProvince = form.watch("province");
-  const watchCity = form.watch("city");
-  const watchBarangay = form.watch("barangay");
 
   // get province api
   const provinceQuery = useQuery<ProvinceType[]>({
@@ -97,63 +94,116 @@ const CreateReport = () => {
         }),
   });
 
+  const watchProvCode = form.watch("prov_code");
+  const watchCityCode = form.watch("citymun_code");
   // get city api
   const cityQuery = useQuery<CityType[]>({
-    queryKey: ["cityquery", provCode],
+    queryKey: ["cityquery", watchProvCode],
     queryFn: () =>
       axios
         .get(
           `${
             import.meta.env.VITE_STAGING_BASE_URL
-          }/location/province/${provCode}/city`
+          }/location/province/${form.getValues("prov_code")}/city`
         )
         .then((res) => {
           return res.data.data;
         }),
 
-    enabled: provCode ? true : false,
+    enabled: form.getValues("prov_code") ? true : false,
   });
 
   // get barangay api
   const barangayQuery = useQuery<BarangyType[]>({
-    queryKey: ["barangayquery", citymunCode],
+    queryKey: ["barangayquery", watchCityCode],
     queryFn: () =>
       axios
         .get(
           `${
             import.meta.env.VITE_STAGING_BASE_URL
-          }/location/city/${citymunCode}/barangay`
+          }/location/city/${form.getValues("citymun_code")}/barangay`
         )
         .then((res) => {
           return res.data.data;
         }),
 
-    enabled: citymunCode ? true : false,
+    enabled: form.getValues("citymun_code") ? true : false,
   });
 
   // get city by province id
 
+  const user = user$.user.get();
+
+  const onSubmit = useCallback((values: CreateReportSchemaType) => {
+    console.log("user", user);
+
+    if (
+      values.title &&
+      values.description &&
+      values.full_address &&
+      values.province &&
+      values.city &&
+      values.barangay &&
+      values.prov_code &&
+      values.citymun_code &&
+      values.brgy_code
+    ) {
+      toast.loading("Creating report", {
+        id: "create-report",
+      });
+
+      try {
+        axios
+          .post(
+            `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/create`,
+            {
+              user_id: "71ae9168-b21e-45c2-a89e-9608bea6d915",
+              description: values.description,
+              prov_code: "0128",
+              citymun_code: "012801",
+              brgy_code: "012801001",
+            }
+          )
+          .then((res) => {
+            if (res.status === 400) {
+              toast.success("Report Created Successfully", {
+                id: "create-report",
+                duration: 2000,
+              });
+            } else {
+              toast.error("There was an error creating your report", {
+                id: "create-report",
+                duration: 2000,
+              });
+            }
+          })
+          .catch((error) => {
+            toast.error("There was an error creating your report", {
+              id: "create-report",
+              duration: 2000,
+            });
+          });
+      } catch (error) {
+        toast.error("There was an error creating your report", {
+          id: "create-report",
+          duration: 2000,
+        });
+      }
+    } else {
+      toast.error("please fill up the missing fields", {
+        id: "create-report",
+        duration: 2000,
+      });
+    }
+  }, []);
+
   const getMapData = async (value: any) => {
-    if (value) {
-      const getProvinceDetail = provinceQuery.data?.find(
-        (e) => e.provDesc === value.province.toUpperCase()
-      );
-
-      if (getProvinceDetail) {
-        setProvCode(getProvinceDetail.provCode);
-        form.setValue("province", getProvinceDetail.provDesc);
-        form.setValue("city", value.city.toUpperCase());
-
-        const getCityDetail = cityQuery.data?.find(
-          (e) => e.citymunDesc === value.city.toUpperCase()
-        );
-
-        if (getCityDetail) {
-          console.log("update barangay");
-          setCitymunCode(getCityDetail.citymunCode);
-        }
-      } else {
-        form.setValue("province", "");
+    if (
+      !form.getValues("province") &&
+      !form.getValues("city") &&
+      !form.getValues("barangay")
+    ) {
+      if (value) {
       }
     }
   };
@@ -161,8 +211,11 @@ const CreateReport = () => {
   return (
     <Container title={"Create Report"}>
       <Form {...form}>
-        <form className="flex flex-col gap-5">
-          <div className="flex flex-row gap-5">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-5 pb-20 overflow-visible"
+        >
+          <div className="flex flex-col md:flex-row gap-5">
             <FormField
               control={form.control}
               name="title"
@@ -181,7 +234,7 @@ const CreateReport = () => {
 
             <FormField
               control={form.control}
-              name="datetime"
+              name="date"
               render={({ field }) => (
                 <FormItem className="flex items-start flex-col w-full">
                   <FormLabel>Date</FormLabel>
@@ -219,12 +272,12 @@ const CreateReport = () => {
             />
           </div>
 
-          <div className="flex flex-row gap-5">
+          <div className="flex flex-col md:flex-row gap-5">
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem className="flex items-start flex-col w-full min-h-full">
+                <FormItem className="flex items-start flex-col w-full h-52 md:min-h-full">
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
@@ -299,7 +352,10 @@ const CreateReport = () => {
                                     );
                                     form.setValue("city", "");
                                     form.setValue("barangay", "");
-                                    setProvCode(province.provCode);
+                                    form.setValue(
+                                      "prov_code",
+                                      province.provCode
+                                    );
                                   }}
                                 >
                                   <Check
@@ -362,7 +418,10 @@ const CreateReport = () => {
                                   key={city.citymunDesc} // Use a unique identifier, such as province name
                                   onSelect={() => {
                                     form.setValue("city", city.citymunDesc);
-                                    setCitymunCode(city.citymunCode);
+                                    form.setValue(
+                                      "citymun_code",
+                                      city.citymunCode
+                                    );
                                   }}
                                 >
                                   <Check
@@ -429,8 +488,10 @@ const CreateReport = () => {
                                       "barangay",
                                       barangay.brgyDesc
                                     );
-
-                                    setBarangayCode(barangay.brgyCode);
+                                    form.setValue(
+                                      "brgy_code",
+                                      barangay.brgyCode
+                                    );
                                   }}
                                 >
                                   <Check
@@ -455,10 +516,18 @@ const CreateReport = () => {
               />
             </div>
           </div>
+          <div className=" flex h-[350px] lg:h-[400px] w-full">
+            <GoogleMapRender getMapData={getMapData} />
+          </div>
+
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            className="w-[150px] self-center absolute md:right-20 md:top-10"
+          >
+            Submit Report
+          </Button>
         </form>
       </Form>
-      {form.watch("barangay")}
-      <GoogleMapRender getMapData={getMapData} />
     </Container>
   );
 };
