@@ -9,7 +9,8 @@ configureObservablePersistence({
 
 const user$ = observable({
   user: {},
-  isLoggedIn: false
+  isLoggedIn: false,
+  token: ""
 });
 
 persistObservable(user$, {
