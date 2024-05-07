@@ -12,6 +12,8 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { defaultQueryFn } from "./lib/query/queries";
 import NavBar from "./components/navbar/nav";
 import { Toaster } from "@/components/ui/sonner";
+import HomePage from "./pages/home";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -29,6 +31,7 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route element={<NavBar />}>
+                  <Route path="/" element={<HomePage />} />
                   {/* <Route index element={<HomePage />} /> */}
                   <Route
                     index
@@ -44,6 +47,7 @@ function App() {
                 </Route>
               </Routes>
             </BrowserRouter>
+            <Toaster />
           </div>
         </QueryClientProvider>
       </AuthProvider>

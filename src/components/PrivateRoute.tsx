@@ -1,9 +1,10 @@
 import {user$} from '@/lib/states/userState';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, redirect, useLocation } from 'react-router-dom';
+import { observer } from "@legendapp/state/react"
 
 const publicRoute = ["/sign-in", "/sign-up"]
 
-const  PrivateRoute = () => {
+const  PrivateRoute = observer(() => {
   const {pathname} = useLocation()
   const isLoggedIn = user$.isLoggedIn.get()
   
@@ -20,6 +21,6 @@ const  PrivateRoute = () => {
     }
     return <Navigate to="/sign-in" />
   }
-}
+})
 
 export default PrivateRoute;
