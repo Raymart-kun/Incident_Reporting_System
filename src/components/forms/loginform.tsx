@@ -38,7 +38,7 @@ const LoginForm = () => {
       )
 
       const { code, data: token } = userData
-      const user = decodeToken(token)
+      const user = await decodeToken(token.token)
       if (code === 200) {
         const isLoggedIn = signIn({
           auth: {
