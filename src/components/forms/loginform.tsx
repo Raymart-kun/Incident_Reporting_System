@@ -38,7 +38,7 @@ const LoginForm = () => {
       )
 
       const { code, data: token } = userData
-      const user = decodeToken(token)
+      const user = await decodeToken(token.token)
       if (code === 200) {
         const isLoggedIn = signIn({
           auth: {
@@ -53,6 +53,7 @@ const LoginForm = () => {
         if (isLoggedIn) {
           user$.user.set(user);
           user$.isLoggedIn.set(true);
+          user$.token.set(token.token);
           toast.dismiss(toastId);
           toast.success("Logged in successfully");
           navigate("/create-report", { replace: true });
