@@ -8,11 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { decodeToken } from "react-jwt";
 import { user$ } from "@/lib/states/userState";
 import axios from "axios";
-import { useState } from "react";
 import { SignInSchema } from "@/types";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { toast } from "sonner";
-
 
 const LoginForm = () => {
   const signIn = useSignIn()
@@ -53,7 +51,7 @@ const LoginForm = () => {
         if (isLoggedIn) {
           user$.user.set(user);
           user$.isLoggedIn.set(true);
-          user$.token.set(token.token);
+          user$.token.set(token);
           toast.dismiss(toastId);
           toast.success("Logged in successfully");
           navigate("/create-report", { replace: true });
