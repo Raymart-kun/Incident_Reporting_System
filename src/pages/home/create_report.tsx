@@ -37,8 +37,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { MappedProvince } from "psgc/dist/PsgcInterface";
 import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 export interface ProvinceType {
   id: number;
@@ -69,94 +69,94 @@ const CreateReport = () => {
   const [provinceState, setProvinceState] = useState<ProvinceType[] | null>(
     null
   );
-  const [provCode, setProvCode] = useState<string>("");
-  const [citymunCode, setCitymunCode] = useState<string>("");
+  const [provCode, setProvCode] = useState<string | null>(null);
+  const [citymunCode, setCitymunCode] = useState<string | null>(null);
   const [barangayCode, setBarangayCode] = useState<string>("");
-  const [cityState, setCityState] = useState<CityType[] | null>(null);
-  const [barangayState, setBarangayState] = useState<BarangyType[] | null>(
-    null
-  );
-
-  // get provinces
-  useEffect(() => {
-    async function getProvince() {
-      try {
-        await await axios
-          .get(`${import.meta.env.VITE_STAGING_BASE_URL}/location/province`)
-          .then((res) => setProvinceState(res.data.data));
-      } catch (error: any) {
-        throw new Error(error);
-      }
-    }
-
-    getProvince();
-  }, []);
-
-  // get city by province id
-  const getCityByProvinceId = useCallback(
-    async (provinceId: string) => {
-      try {
-        await axios
-          .get(
-            `${
-              import.meta.env.VITE_STAGING_BASE_URL
-            }/location/province/${provinceId}/city`
-          )
-          .then((res) => setCityState(res.data.data));
-      } catch (error: any) {
-        throw new Error(error);
-      }
-    },
-    [provCode]
-  );
-
-  // get city by province id
-  const getBarangayByCityId = useCallback(
-    async (bgryId: string) => {
-      try {
-        await axios
-          .get(
-            `${
-              import.meta.env.VITE_STAGING_BASE_URL
-            }/location/city/${bgryId}/barangay`
-          )
-          .then((res) => setBarangayState(res.data.data));
-      } catch (error: any) {
-        throw new Error(error);
-      }
-
-      console.log(cityState);
-    },
-    [citymunCode]
-  );
 
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
     defaultValues: {
       city: "",
       province: "",
+      barangay: "",
     },
   });
 
-  const getMapData = useCallback((value: any) => {
+  const watchProvince = form.watch("province");
+  const watchCity = form.watch("city");
+  const watchBarangay = form.watch("barangay");
+
+  // get province api
+  const provinceQuery = useQuery<ProvinceType[]>({
+    queryKey: ["provincequery"],
+    queryFn: () =>
+      axios
+        .get(`${import.meta.env.VITE_STAGING_BASE_URL}/location/province`)
+        .then((res) => {
+          return res.data.data;
+        }),
+  });
+
+  // get city api
+  const cityQuery = useQuery<CityType[]>({
+    queryKey: ["cityquery", provCode],
+    queryFn: () =>
+      axios
+        .get(
+          `${
+            import.meta.env.VITE_STAGING_BASE_URL
+          }/location/province/${provCode}/city`
+        )
+        .then((res) => {
+          return res.data.data;
+        }),
+
+    enabled: provCode ? true : false,
+  });
+
+  // get barangay api
+  const barangayQuery = useQuery<BarangyType[]>({
+    queryKey: ["barangayquery", citymunCode],
+    queryFn: () =>
+      axios
+        .get(
+          `${
+            import.meta.env.VITE_STAGING_BASE_URL
+          }/location/city/${citymunCode}/barangay`
+        )
+        .then((res) => {
+          return res.data.data;
+        }),
+
+    enabled: citymunCode ? true : false,
+  });
+
+  // get city by province id
+
+  const getMapData = async (value: any) => {
     if (value) {
-      form.setValue("city", value.city.toUpperCase());
-      form.setValue("province", value.province.toUpperCase());
-    }
-
-    console.log(value.city);
-
-    if (provinceState) {
-      const provinceDetail = provinceState.find(
+      const getProvinceDetail = provinceQuery.data?.find(
         (e) => e.provDesc === value.province.toUpperCase()
       );
 
-      if (provinceDetail) getCityByProvinceId(provinceDetail.provCode);
-      if (barangayState) {
-        console.log("adad");
+      if (getProvinceDetail) {
+        setProvCode(getProvinceDetail.provCode);
+        form.setValue("province", getProvinceDetail.provDesc);
+        form.setValue("city", value.city.toUpperCase());
+
+        const getCityDetail = cityQuery.data?.find(
+          (e) => e.citymunDesc === value.city.toUpperCase()
+        );
+
+        if (getCityDetail) {
+          console.log("update barangay");
+          setCitymunCode(getCityDetail.citymunCode);
+        }
+      } else {
+        form.setValue("province", "");
       }
     }
-  }, []);
+  };
 
   return (
     <Container title={"Create Report"}>
@@ -272,7 +272,7 @@ const CreateReport = () => {
                             )}
                           >
                             {field.value
-                              ? provinceState?.find(
+                              ? provinceQuery.data?.find(
                                   (province) =>
                                     province.provDesc === field.value
                                 )?.provDesc
@@ -288,7 +288,7 @@ const CreateReport = () => {
 
                           <CommandGroup>
                             <CommandList>
-                              {provinceState?.map((province) => (
+                              {provinceQuery.data?.map((province) => (
                                 <CommandItem
                                   value={province.provDesc}
                                   key={province.provDesc} // Use a unique identifier, such as province name
@@ -297,8 +297,9 @@ const CreateReport = () => {
                                       "province",
                                       province.provDesc
                                     );
+                                    form.setValue("city", "");
+                                    form.setValue("barangay", "");
                                     setProvCode(province.provCode);
-                                    getCityByProvinceId(province.provCode);
                                   }}
                                 >
                                   <Check
@@ -340,7 +341,7 @@ const CreateReport = () => {
                             )}
                           >
                             {field.value
-                              ? cityState?.find(
+                              ? cityQuery.data?.find(
                                   (city) => city.citymunDesc === field.value
                                 )?.citymunDesc
                               : "Select City."}
@@ -355,15 +356,13 @@ const CreateReport = () => {
 
                           <CommandGroup>
                             <CommandList>
-                              {cityState?.map((city) => (
+                              {cityQuery.data?.map((city) => (
                                 <CommandItem
                                   value={city.citymunDesc}
                                   key={city.citymunDesc} // Use a unique identifier, such as province name
                                   onSelect={() => {
                                     form.setValue("city", city.citymunDesc);
-
                                     setCitymunCode(city.citymunCode);
-                                    getBarangayByCityId(city.citymunCode);
                                   }}
                                 >
                                   <Check
@@ -395,7 +394,7 @@ const CreateReport = () => {
                     <FormLabel className="self-start">Barangay</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <FormControl>
+                        <FormControl aria-disabled>
                           <Button
                             variant="outline"
                             role="combobox"
@@ -405,7 +404,7 @@ const CreateReport = () => {
                             )}
                           >
                             {field.value
-                              ? barangayState?.find(
+                              ? barangayQuery.data?.find(
                                   (barangay) =>
                                     barangay.brgyDesc === field.value
                                 )?.brgyDesc
@@ -421,7 +420,7 @@ const CreateReport = () => {
 
                           <CommandGroup>
                             <CommandList>
-                              {barangayState?.map((barangay) => (
+                              {barangayQuery.data?.map((barangay) => (
                                 <CommandItem
                                   value={barangay.brgyDesc}
                                   key={barangay.brgyCode} // Use a unique identifier, such as province name
@@ -458,7 +457,7 @@ const CreateReport = () => {
           </div>
         </form>
       </Form>
-
+      {form.watch("barangay")}
       <GoogleMapRender getMapData={getMapData} />
     </Container>
   );
