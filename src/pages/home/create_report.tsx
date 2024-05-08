@@ -26,11 +26,10 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import {
   Command,
   CommandEmpty,
@@ -50,7 +49,7 @@ const CreateReport = () => {
   const [cityDropdown, setCityDropdown] = useState(false);
   const [brgyDropdown, setBrgyDropdown] = useState(false);
   const user: any = user$.user.get();
-  const token = user$.token.get();
+  const token: any = user$.token.get();
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
     defaultValues: {
@@ -148,7 +147,7 @@ const CreateReport = () => {
               body,
               {
                 headers: {
-                  Authorization: `Bearer ${token}`,
+                  Authorization: `Bearer ${token.token}`,
                 },
               }
             )

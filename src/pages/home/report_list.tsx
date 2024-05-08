@@ -27,12 +27,12 @@ const ReportList = () => {
           }/list`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token.token}`,
             },
           }
         )
         .then((res) => {
-          return res;
+          return res.data.data;
         }),
   });
 
@@ -49,12 +49,18 @@ const ReportList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell className="text-center">INV001</TableCell>
-            <TableCell className="text-center">Fire</TableCell>
-            <TableCell className="text-center">House Fire</TableCell>
-            <TableCell className="text-center">Quezon City</TableCell>
-          </TableRow>
+          {reportQuery.data &&
+            reportQuery.data.length > 0 &&
+            reportQuery.data.map((data: any) => (
+              <TableRow key={data.id}>
+                <TableCell className="text-center">{data.id}</TableCell>
+                <TableCell className="text-center">Fire</TableCell>
+                <TableCell className="text-center">
+                  {data.description}
+                </TableCell>
+                <TableCell className="text-center">{}</TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </Container>
