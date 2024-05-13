@@ -84,7 +84,7 @@ const SideNav = ({ setIsOpen }: SideNavProps) => {
           <button
             className="flex px-3 flex-row gap-3 items-center py-2"
             onClick={() => {
-              user$.set({ user: {}, isLoggedIn: false });
+              user$.delete();
               signOut();
               navigate("/sign-in", { replace: true });
             }}
