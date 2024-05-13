@@ -63,7 +63,6 @@ const ReportList = () => {
         <TableHeader>
           <TableRow>
             <TableHead className="text-center">ID</TableHead>
-            <TableHead className="text-center">Title</TableHead>
             <TableHead className="text-center">Description</TableHead>
             <TableHead className="text-center">City</TableHead>
           </TableRow>
@@ -72,13 +71,14 @@ const ReportList = () => {
           {reportQuery.data &&
             reportQuery.data.length > 0 &&
             reportQuery.data.map((data: any) => (
-              <TableRow key={data.id}>
+              <TableRow key={data.id} className="cursor-pointer">
                 <TableCell className="text-center">{data.id}</TableCell>
-                <TableCell className="text-center">Fire</TableCell>
                 <TableCell className="text-center">
                   {data.description}
                 </TableCell>
-                <TableCell className="text-center">{}</TableCell>
+                <TableCell className="text-center">
+                  {data.citymun_code}
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>
