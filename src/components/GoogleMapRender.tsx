@@ -15,7 +15,7 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
   const [location, setLocation] = useState({ lng: 12.8797, lat: 121.774 });
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+    googleMapsApiKey: "AIzaSyAo94577VUS3xGDmHUm-ogK8ey1pjyn7kI",
   });
 
   useEffect(() => {
@@ -49,18 +49,18 @@ const GoogleMapRender: React.FC<GoogleMapRenderProps> = ({ getMapData }) => {
 
     const selectedLocation = e.latLng.toJSON();
     setLocation(selectedLocation);
-    // console.log(
-    //   "selectedLocation:",
-    //   selectedLocation.lng,
-    //   selectedLocation.lat
-    // );
+    console.log(
+      "selectedLocation:",
+      selectedLocation.lng,
+      selectedLocation.lat
+    );
 
     const { lat, lng } = selectedLocation;
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
       if (status === "OK") {
         if (results) {
           const firstResult = results[0];
-          // console.log(firstResult);
+          console.log(firstResult);
           const province = firstResult.address_components.find(
             (component) =>
               component.types.includes("administrative_area_level_2") ||
