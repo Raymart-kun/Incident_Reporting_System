@@ -39,7 +39,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { user$ } from "@/lib/states/userState";
 import { BarangyType, CityType, ProvinceType } from "@/types";
 
@@ -50,6 +50,7 @@ const CreateReport = () => {
   const [brgyDropdown, setBrgyDropdown] = useState(false);
   const user: any = user$.user.get();
   const token: any = user$.token.get();
+  const queryClient = useQueryClient();
   const form = useForm<CreateReportSchemaType>({
     resolver: zodResolver(CreateReportSchema),
     defaultValues: {
@@ -115,7 +116,7 @@ const CreateReport = () => {
 
   // get city by province id
 
-  const onSubmit = useCallback((values: CreateReportSchemaType) => {
+  const onSubmit = useCallback(async (values: CreateReportSchemaType) => {
     if (
       values.title &&
       values.description &&
@@ -136,6 +137,13 @@ const CreateReport = () => {
           brgy_code: values.brgy_code,
         };
 
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        };
+
+        console.log(body);
+        console.log(token, token.token);
         try {
           setIsLoading(true);
           toast.loading("Creating report", {
@@ -146,9 +154,7 @@ const CreateReport = () => {
               `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/create`,
               body,
               {
-                headers: {
-                  Authorization: `Bearer ${token.token}`,
-                },
+                headers,
               }
             )
             .then((res) => {
@@ -156,6 +162,8 @@ const CreateReport = () => {
                 id: "create-report",
                 duration: 2000,
               });
+
+              queryClient.invalidateQueries({ queryKey: ["reportlist"] });
               setIsLoading(false);
               form.reset();
             })

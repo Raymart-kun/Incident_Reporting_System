@@ -36,24 +36,24 @@ const ReportList = () => {
         }),
   });
 
-  const reportById = useQuery({
-    queryKey: ["reportbyid"],
-    queryFn: () =>
-      axios
-        .get(
-          `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/user/${
-            user.id
-          }/list`,
-          {
-            headers: {
-              Authorization: `Bearer ${token.token}`,
-            },
-          }
-        )
-        .then((res) => {
-          return res.data.data;
-        }),
-  });
+  // const reportById = useQuery({
+  //   queryKey: ["reportbyid"],
+  //   queryFn: () =>
+  //     axios
+  //       .get(
+  //         `${import.meta.env.VITE_STAGING_BASE_URL}/incident-report/user/${
+  //           user.id
+  //         }/list`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token.token}`,
+  //           },
+  //         }
+  //       )
+  //       .then((res) => {
+  //         return res.data.data;
+  //       }),
+  // });
 
   console.log(reportQuery.data);
   return (
